@@ -348,7 +348,11 @@ function PipelineCard({ name, data, judge, judgeSource, graded, citation, t }) {
 function ResultsSection({ result, t }) {
   const pct    = result.token_reduction_pct;
   const graphFailed  = result.graphrag_status && !['ok', 'vector_only'].includes(result.graphrag_status);
-  const basicRagFailed = result.basic_rag?.status === 'faiss_unavailable';
+  // Backend reports 'index_unavailable' when the FAISS index isn't deployed.
+  // Also treat a null token_reduction_pct as unavailable so the hero (which
+  // needs that number) never renders NaN.
+  const basicRagFailed = result.basic_rag?.status === 'index_unavailable'
+    || result.token_reduction_pct == null;
   const maxTok = Math.max(...PIPELINE_KEYS.map(k => result[k].total_tokens));
   const chartData = PIPELINE_KEYS.map(k => ({
     name: PIPELINE_LABELS[k], tokens: result[k].total_tokens, color: PIPELINE_COLORS[k],
