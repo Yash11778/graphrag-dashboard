@@ -7,6 +7,7 @@ import {
   Sparkles, TrendingDown, Award, ChevronDown, BookOpen,
   Layers, GitMerge,
 } from 'lucide-react';
+import { FEATURED_QUESTIONS, DOMAIN_QUESTIONS } from './round3_questions';
 
 const API_BASE = import.meta.env.VITE_API_BASE || '';
 
@@ -17,112 +18,11 @@ const PIPELINE_LABELS  = { llm_only: 'LLM-Only', basic_rag: 'Basic RAG', graphra
 const PIPELINE_ICONS   = { llm_only: Brain, basic_rag: Database, graphrag: Network };
 const PIPELINE_DESC    = {
   llm_only:  'No retrieval — pure parametric knowledge',
-  basic_rag: 'FAISS vector search · top-5 chunks',
-  graphrag:  'TigerGraph multi-hop · num_hops=2',
+  basic_rag: 'FAISS vector search · top-8 chunks · same embedder',
+  graphrag:  'Savanna typed traversals + scoped HNSW · 0-token router',
 };
 
-/* ─── Featured questions — each entity verified to exist in the LIVE TigerGraph graph
-   and the answer confirmed on-topic. No pre-computed reduction numbers here: the only
-   percentages shown anywhere are the genuine ones measured live after a query runs. ─── */
-const FEATURED_QUESTIONS = [
-  {
-    label: 'Peremptory Challenges',
-    icon: '⚖️',
-    question: 'How did the court in People v. Kern (5987526) apply the principle from People v. Stiff (6000712) regarding the deference given to a trial court\'s determination that race-neutral explanations for peremptory challenges were pretextual?',
-    answer: 'The court in People v. Kern affirmed the Supreme Court\'s determination that defense counsel\'s explanations for peremptory challenges were pretextual, stating that this determination is entitled to great deference on appeal and will not be disturbed when supported by the record, a principle consistent with the dissenting opinion in People v. Stiff, which argued that the trial court did not err in deeming a juror\'s relationships too remote to be anything but pretextual and that the court\'s conclusion was borne out by defense counsel\'s misleading suggestions.',
-    hint: '2-hop . cases 5987526, 6000712',
-  },
-  {
-    label: 'Codefendant Defense',
-    icon: '🧑‍🤝‍🧑',
-    question: 'What common legal issue did both People v. Wynn (5972547) and People v. Contes (5966890) address regarding a codefendant\'s defense, and what was the outcome in both cases?',
-    answer: 'Both People v. Wynn and People v. Contes addressed the legal issue of whether the People satisfactorily disproved a codefendant\'s justification defense, and in both cases, the court rejected this claim, finding it to be without merit.',
-    hint: '2-hop . cases 5972547, 5966890',
-  },
-  {
-    label: 'Prosecutorial Summation',
-    icon: '🗣️',
-    question: 'How did the court in People v. Bailey (5988028) apply the principle from People v. Moore (6064559) regarding prosecutorial summation comments, specifically when defense counsel attacked witness credibility?',
-    answer: 'In People v. Moore, the court affirmed that several allegedly improper prosecutorial statements on summation were fair responses to defense counsel\'s comments regarding the credibility of prosecution witnesses. Similarly, in People v. Bailey, the court applied this principle by finding that the prosecutor\'s review of an eyewitness\'s testimony and stress on its consistency with police accounts was a permissible response to defense counsel\'s repeated attacks on that witness\'s credibility, despite an isolated improper comment that the witness was "telling the truth."',
-    hint: '2-hop . cases 6064559, 5988028',
-  },
-  {
-    label: 'Verdict Sheet Objections',
-    icon: '📋',
-    question: 'How did the court in People v. Gladman (5905980) apply the principle regarding the preservation of objections to verdict sheets, as established or referenced in People v. Ervin (5920424), to the defendant\'s appeal?',
-    answer: 'The court in People v. Gladman applied the principle by stating that the defendant\'s contention regarding the submission of verdict sheets was unpreserved for appellate review because he failed to object to their submission at trial, mirroring the reasoning in People v. Ervin which also found such a contention unpreserved due to the lack of an objection.',
-    hint: '2-hop . cases 5905980, 5920424',
-  },
-  {
-    label: 'Consent vs Probable Cause',
-    icon: '🔍',
-    question: 'What principle regarding consent as a substitute for probable cause originated in People v. Hodge (5956508), how did People v. Langdon (5989323) apply it, and how did People v. Robert C. W. (5992365) in turn build on or distinguish People v. Langdon\'s application of it?',
-    answer: 'The principle that consent is a valid substitute for probable cause originated in People v. Hodge, where the court found no merit to the defendant\'s argument that his oral statements were the product of custodial detention without probable cause because he voluntarily agreed to accompany the officer. People v. Langdon applied this principle by affirming a youthful offender adjudication, finding that the interview of the defendant and subsequent transport to the scene of a burglary were consensual and proper. People v. Robert C. W. did not directly build on or distinguish People v. Langdon\'s application of the consent principle; instead, People v. Robert C. W. focused on the separate issue of when the right to counsel attaches, specifically whether the mere assignment of counsel constitutes actual representation precluding interrogation on an unrelated charge, a point also touched upon in People v. Langdon regarding the right to counsel, but distinct from the consent issue.',
-    hint: '3-hop . cases 5956508, 5989323, 5992365',
-  },
-];
-
-const DOMAIN_QUESTIONS = [
-  {
-    domain: '⚖️ Criminal Procedure (2-hop)',
-    questions: [
-      { question: 'How did the court in The Gas and Water Company of Downingtown v. The Borough of Downingtown (6245513) apply the principle regarding the sufficiency of an act\'s title, as discussed in Kittanning v. Mast (6274415), to determine the validity of the plaintiff\'s title to rights and franchises?', answer: 'In Kittanning v. Mast, the court discussed the principle that a legislative act\'s title does not need to be an index of its contents, but rather needs only to fairly give notice of the subject matter so as not to mislead. The Gas and Water Company of Downingtown v. The Borough of Downingtown applied this principle by upholding the validity of the plaintiff\'s title to rights and franchises, which was derived from a sheriff\'s sale under the Act of May 25, 1878. The court reasoned that despite the act\'s title not specifically mentioning gas and water companies, it was a supplement extending the provisions of an earlier act to various companies, and the act itself clearly included gas and water companies in its first section. Therefore, the title was deemed sufficient to give notice of the act\'s scope, consistent with the standard articulated in Kittanning v. Mast.' },
-      { question: 'How did the court in Mulder v Donaldson, Lufkin & Jenrette (5997968) apply the principle of "law of the case" doctrine, as referenced in Krolick v DeGraff (6027842), to determine whether a punitive damages claim could be compelled to arbitration?', answer: 'The court in Mulder v Donaldson, Lufkin & Jenrette did not apply the "law of the case" doctrine to determine whether a punitive damages claim could be compelled to arbitration. Instead, it cited Mulder v Donaldson, Lufkin & Jenrette as an example of a case where the "law of the case" doctrine did not preclude consideration of a breach of fiduciary duty cause of action because the issue had not been resolved on the merits in a prior appeal. The primary issue in Mulder v Donaldson, Lufkin & Jenrette was whether the IAS Court properly denied defendant’s motion to compel arbitration of plaintiff’s punitive damages claim in light of the United States Supreme Court decision in Mastrobuono v Shearson Lehman Hutton, not the application of the "law of the case" doctrine to that specific arbitration issue.' },
-      { question: 'How did the Pennsylvania Superior Court\'s application of the "clear and convincing evidence" standard, as established in Santosky v. Kramer (6305374), differ between the case involving L.A.J. and the case involving Scott and Tommy, regarding the necessity of new evidentiary hearings?', answer: 'In the case involving L.A.J., the Pennsylvania Superior Court reversed and remanded for the application of the "clear and convincing evidence" standard without explicitly addressing the necessity of new evidentiary hearings, as the decision in Santosky v. Kramer was issued while the case was pending on appeal. However, in the case involving Scott and Tommy, the court explicitly stated that new evidentiary hearings may not be necessary and left it to the trial court to determine, after hearing arguments of counsel, whether new evidentiary hearings were required, or if the court could simply reconsider its prior findings in light of the clear and convincing standard.' },
-      { question: 'What was the ultimate procedural outcome for Harrison Graham\'s death sentence appeal, considering the Pennsylvania Supreme Court\'s decision in COMMONWEALTH of Pennsylvania, Appellee, v. Harrison GRAHAM, Appellant (1985671) and the subsequent order in Commonwealth v. Graham (6265216)?', answer: 'Despite Harrison Graham\'s desire to dismiss his appeal, the Pennsylvania Supreme Court in COMMONWEALTH of Pennsylvania, Appellee, v. Harrison GRAHAM, Appellant affirmed his death sentences due to the statutory requirement for automatic review in capital cases, and subsequently, the Pennsylvania Supreme Court in Commonwealth v. Graham granted a stay of execution pending the United States Supreme Court\'s decision on his petition for a writ of certiorari.' },
-      { question: 'How did the court\'s reasoning for reversing the conviction in People v. Varona (5930500) relate to the basis for reversal in People v. Gray (5948198), given that both cases were decided by the same judge on the same date for the same crime?', answer: 'The court in People v. Varona reversed the conviction specifically due to the trial court\'s refusal to permit defendants to offer expert testimony regarding the complaining witness\'s mental capacity, citing the memorandum decision in the appeal of codefendant Jerome Dudley. People v. Gray, decided by the same judge on the same date for the same crime, was also reversed for the reasons set forth in the memorandum decision in the appeal of codefendant Jerome Dudley, indicating that the same issue regarding expert testimony on the complaining witness\'s mental capacity was the common ground for reversal in both cases.' },
-      { question: 'What common legal issue did both People v. Wynn (5972547) and People v. Contes (5966890) address regarding a codefendant\'s defense, and what was the outcome in both cases?', answer: 'Both People v. Wynn and People v. Contes addressed the legal issue of whether the People satisfactorily disproved a codefendant\'s justification defense, and in both cases, the court rejected this claim, finding it to be without merit.' },
-      { question: 'How did the court in People v. Lopez (6044208) distinguish its application of the preservation rule from People v. Lopez (6055357) regarding challenges to the factual sufficiency of a plea allocution, and what specific circumstance allowed for this distinction?', answer: 'While People v. Lopez (6055357) affirmed that a challenge to the factual sufficiency of a plea allocution is not preserved without a motion to withdraw the plea or vacate the judgment, People v. Lopez (6044208) recognized an exception to this rule. The court in People v. Lopez (6044208) found that a direct appeal challenging the sufficiency of the allocution was permissible, despite the absence of a formal post-allocution motion, because the defendant explicitly denied an essential element of the crime (that his ability to operate the motor vehicle was impaired by alcohol) during the allocution for aggravated unlicensed operation of a motor vehicle, thereby negating an element of the crime and requiring further inquiry from the court.' },
-      { question: 'How did the court in People v. Sloan (5983908) implicitly distinguish its approach to evaluating the impact of a defendant\'s absence during voir dire from the dissenting judge\'s perspective in People v. Stiff (6000712) regarding the necessity of a detailed record for appellate review of juror challenges?', answer: 'In People v. Sloan, the court affirmed the judgment despite an off-the-record side-bar voir dire with one prospective juror, reasoning that the substance of the discussion was later disclosed in open court and the juror was peremptorily challenged, thus the defendant\'s absence did not substantially affect his defense. However, for a second off-the-record side-bar where no substance was disclosed, the court found the record insufficient for appellate review and declined to remit for a reconstruction hearing. This contrasts with the dissenting judge\'s detailed analysis in People v. Stiff, where the judge meticulously recounted defense counsel\'s misleading statements and lack of voir dire regarding a challenged juror\'s connections, using these specific record details to argue that the trial court did not err in deeming the challenge pretextual, thereby emphasizing the importance of a clear and complete record for evaluating the legitimacy of juror challenges on appeal.' },
-    ],
-  },
-  {
-    domain: '📜 Civil, Contract & Property Law (2-hop)',
-    questions: [
-      { question: 'How did the court in Rosenthal v. Elirlicher (6271651) apply the principle, recognized in Catlin v. Robinson (6234518), regarding the time limit for opening adversely obtained judgments, to justify granting a new trial nunc pro tunc more than two years after the original verdict?', answer: 'The court in Rosenthal v. Elirlicher acknowledged the established principle, recognized in Catlin v. Robinson, that the power to open adversely obtained judgments generally ceases with the term at which they are entered. However, it found an exception in this case due to the unique circumstances where the failure to properly prepare the record for review was attributed to erroneous ideas of practice, which were only corrected by later decisions. The Supreme Court had previously suggested that this was a proper case for relief by the court below, and the defendant had allowed the matter to rest upon an assurance of relief. Therefore, the court exercised its discretion to vacate the judgment and grant a new trial nunc pro tunc, despite the significant passage of time, to rectify a procedural error that prevented a proper review of the merits.' },
-      { question: 'How did the court in People v. Frederick (5947537) apply the principle from People v. Frederick (5996423) regarding the sufficiency of the record to refute a claim of ineffective assistance of counsel, specifically concerning the defendant\'s satisfaction with their legal representation?', answer: 'In People v. Frederick (5947537), the court applied the principle from People v. Frederick (5996423) by affirming that a defendant\'s belated claim of ineffective assistance of counsel is refuted by the plea proceeding record where the defendant expressed satisfaction with counsel, similar to how the earlier People v. Frederick found the claim refuted by the record showing the defendant admitted satisfaction with their attorneys\' advice and representation.' },
-      { question: 'How did the court in People v. Bailey (5988028) apply the principle from People v. Moore (6064559) regarding prosecutorial summation comments, specifically when defense counsel attacked witness credibility?', answer: 'In People v. Moore, the court affirmed that several allegedly improper prosecutorial statements on summation were fair responses to defense counsel\'s comments regarding the credibility of prosecution witnesses. Similarly, in People v. Bailey, the court applied this principle by finding that the prosecutor\'s review of an eyewitness\'s testimony and stress on its consistency with police accounts was a permissible response to defense counsel\'s repeated attacks on that witness\'s credibility, despite an isolated improper comment that the witness was "telling the truth."' },
-      { question: 'How did the court in People v. Kern (5987526) apply the principle from People v. Stiff (6000712) regarding the deference given to a trial court\'s determination that race-neutral explanations for peremptory challenges were pretextual?', answer: 'The court in People v. Kern affirmed the Supreme Court\'s determination that defense counsel\'s explanations for peremptory challenges were pretextual, stating that this determination is entitled to great deference on appeal and will not be disturbed when supported by the record, a principle consistent with the dissenting opinion in People v. Stiff, which argued that the trial court did not err in deeming a juror\'s relationships too remote to be anything but pretextual and that the court\'s conclusion was borne out by defense counsel\'s misleading suggestions.' },
-      { question: 'How did the court in People v. Freeman (5966590) expand upon the reasoning from People v. Contes (6005869) regarding the improper jury instruction about "reasonable degree of certainty"?', answer: 'While People v. Contes found the jury instruction that "it is possible to establish the guilt of a defendant charged with a crime to a reasonable degree of certainty. To that degree of proof, the People must be held" to be an improper reduction of the People\'s burden of proof, People v. Freeman further specified that this error in the charge deprived the defendant of their Fifth Amendment right to a verdict of guilt beyond a reasonable doubt, citing additional Supreme Court precedent like Sullivan v Louisiana and Cage v Louisiana to support this constitutional implication.' },
-      { question: 'How did the court in Delehanty, S. (6156400) apply the principle from Frankenthaler, S. (6161070) regarding the apportionment of estate taxes for annuities, and what additional guidance did Delehanty, S. provide concerning the reimbursement method?', answer: 'The court in Delehanty, S. applied the principle from Frankenthaler, S. by stating that the tax on the value of annuities must be paid initially from the fund set aside to produce them, and this payment is to be reimbursed to the estate according to the rule in Matter of Tracy. Delehanty, S. further clarified that if the parties voluntarily agree upon a method for reimbursement that eases the burden on the annuitants, the court will approve such a consented program.' },
-    ],
-  },
-  {
-    domain: '🏛️ Constitutional & Family Law (2-hop)',
-    questions: [
-      { question: 'How did the court in Jones v. Wagner (6238956) interpret the phrase "shall do as little damage to the surface as possible" in a deed reserving mineral rights, and how does this interpretation relate to the three classes of cases concerning surface support waivers identified in Jones v. Wagner (6251038)?', answer: 'In Jones v. Wagner, the court interpreted the phrase "shall do as little damage to the surface as possible" as applying to the surface rights indispensable for mining operations, such as making explorations, boring holes, sinking shafts, and erecting structures, rather than implying a waiver of the absolute right to surface support. This interpretation places the case within the first class of cases identified in the earlier Jones v. Wagner opinion, where there is no express or implied waiver of damages to the surface, thus entitling the surface owner to recover compensation for injuries sustained due to a failure to properly support the surface.' },
-      { question: 'How did the court in Mercado v. City of New York (6067592) apply the principle regarding a partial directed verdict, as established in Szczerbiak v Pilat (2022154), to the specific facts of the medical malpractice/wrongful death action before it?', answer: 'In Mercado v. City of New York, the court applied the principle from Szczerbiak v Pilat, which concerns the standard for granting a directed verdict, by granting the defendant\'s motion for a partial directed verdict. This was done because, even affording the plaintiffs every favorable inference, there was no rational process by which the triers of fact could have found that the defendant had prescribed Macrodantin for the decedent, thus precluding all reference to the drug.' },
-      { question: 'How did the court in Matter Torres v. Coughlin (6019606) apply the principle of substantial evidence for possession of a weapon, as established in Matter Bryant v. Coughlin (6047146), to a situation where other inmates had access to the area where the weapon was found?', answer: 'In Matter Torres v. Coughlin, the court applied the principle of substantial evidence for possession of a weapon by determining that the discovery of a metal shank under the petitioner\'s locker, an area over which he had control, was sufficient to create a reasonable inference of possession, even though other inmates had access to that area. This aligns with the general principle of substantial evidence for weapon possession affirmed in Matter Bryant v. Coughlin, which found that misbehavior reports and correction officer testimony constituted substantial evidence for a weapon possession violation.' },
-      { question: 'How did the court in Co. v. City of New York (5932666) implicitly distinguish the type of fraud claims that were dismissed in Murtha v. Yonkers Child Care Assn. (6045687) when it affirmed the denial of leave to amend the complaint?', answer: 'In Co. v. City of New York, the court affirmed the denial of leave to amend the complaint by stating that the proposed fraud claims were legally deficient because they relied upon alleged misrepresentations of future intent and failed to plead fraud with sufficient particularity, and also because a cause of action for fraud does not arise when the only fraud alleged relates to a breach of contract. This implicitly distinguishes the fraud claims in Murtha v. Yonkers Child Care Assn., where the court simply stated that the plaintiff\'s allegations, even if true, failed to set forth the requisite elements to support viable claims for fraud or tortious interference with contract, without specifying the particular deficiencies related to future intent, particularity, or the relationship to a breach of contract.' },
-      { question: 'How did the court in Mansour v. Abrams (5909013) apply the principle of requiring discovery for proof of malice, as established in Mansour v. Abrams (5979990), to the specific context of a tortious interference claim against defendant Marcus?', answer: 'The court in Mansour v. Abrams (5909013) applied the principle from Mansour v. Abrams (5979990) by stating that plaintiff was entitled to previously ordered discovery to explore Marcus\'s motivation because plaintiff must prove that Marcus acted in bad faith to prove his cause of action for tortious interference with an at-will contract, thereby linking the need for discovery to establish malice (or bad faith in this context) to a specific defendant and cause of action.' },
-      { question: 'How did the court in People v. Gladman (5905980) apply the principle regarding the preservation of objections to verdict sheets, as established or referenced in People v. Ervin (5920424), to the defendant\'s appeal?', answer: 'The court in People v. Gladman applied the principle by stating that the defendant\'s contention regarding the submission of verdict sheets was unpreserved for appellate review because he failed to object to their submission at trial, mirroring the reasoning in People v. Ervin which also found such a contention unpreserved due to the lack of an objection.' },
-      { question: 'How did the court in Hall v. Superior Court (6106766) distinguish the application of attorney fee awards in the context of a prevailing party, as compared to the circumstances that led to the attorney fee award in LAWRENCE PASTERNACK v. THOMAS B. MCCULLOUGH, JR. (4698850)?', answer: 'In LAWRENCE PASTERNACK v. THOMAS B. MCCULLOUGH, JR., the attorney fee award was based on a statutory entitlement for a prevailing defendant on a special motion to strike under the anti-SLAPP statute, where the court determined the reasonable market value of the attorneys\' services. In contrast, Hall v. Superior Court distinguished its situation by finding that Hall was not a successful party entitled to attorney fees because the relief obtained in Hall I was already granted by the trial court and available from the Department of Motor Vehicles, thus not providing any new or additional relief that would qualify him as a prevailing party for a fee award.' },
-      { question: 'How did the court in People v. Whalen (5905090) apply the principle of harmless error regarding the operability instruction, as established in cases like People v. Henry (6024019), to the specific facts of its case?', answer: 'In People v. Whalen, the court applied the harmless error principle by finding that despite the trial court\'s failure to instruct the jury on limiting deliberations to the operability of the weapon at the time of the incident, the error was harmless because the evidence of the defendant\'s possession of the weapon and its operability was overwhelming. This mirrors the reasoning in People v. Henry, where the court also found the failure to deliver an operability instruction to be harmless error due to overwhelming evidence of operability and the absence of any contested issue concerning that element.' },
-      { question: 'How did the court in the later case, People v. Contes (5949510), apply the legal sufficiency standard from the earlier case, People v. Contes (6011888), to determine whether the complainant suffered "physical injury" in the context of a robbery?', answer: 'The court in People v. Contes (5949510) applied the legal sufficiency standard, which requires viewing the evidence in the light most favorable to the prosecution, to find that the complainant suffered "physical injury" under Penal Law § 10.00 (9). This was established by evidence that the defendant knocked the complainant down, grabbed her neck, caused her to fall onto subway steps, resulting in a bruised elbow requiring paramedic treatment and a lasting scar, and "real pain" in her lower back for approximately one month, with the scar alone and the duration of pain being sufficient to constitute physical injury.' },
-      { question: 'How did the court in *State v. Starr* (4656754) clarify the definition of "costs" in RCW 10.01.160(2) in a way that would have been relevant to the sentencing court\'s decision regarding discretionary legal financial obligations for Alexander James Huckins in *State v. Huckins* (4315129), particularly concerning community custody supervision fees?', answer: 'In *State v. Starr*, the court clarified that community custody supervision fees are not "costs" as defined by RCW 10.01.160(2). This clarification would be relevant to *State v. Huckins* because it establishes that such fees are not subject to the same indigency waivers as other discretionary legal financial obligations, meaning that even if Huckins were found indigent, community custody supervision fees would not automatically be waived as "costs."' },
-      { question: 'How did the court in Vasile v. Vasile (5964594) apply the principle regarding the termination of visitation rights, as referenced in Matter Reed v. Crim (5991610), to the specific facts of its case?', answer: 'The court in Vasile v. Vasile applied the principle that termination of visitation requires compelling reasons and substantial evidence of detriment to the child\'s welfare by finding that the respondent\'s use of excessive physical force on the children, repeated disregard of court orders, and use of the children as pawns in disputes with his ex-wife constituted substantial evidence justifying the termination of visitation rights.' },
-      { question: 'How did the court in Smith v. Hay (6272238) apply the principle from Mullet v. Hensel (6272488) regarding the sound discretion of the court in opening a judgment, and what specific factor in Smith v. Hay led to a partial modification of the judgment, unlike the complete refusal to open in Mullet v. Hensel?', answer: 'The court in Smith v. Hay applied the principle from Mullet v. Hensel that an application to open a judgment is addressed to the sound discretion of the court and that the appellate question is whether that discretion was properly exercised. While Smith v. Hay, like Mullet v. Hensel, generally refused to open the judgment based on insufficient evidence for the main contention, Smith v. Hay partially modified the judgment by directing a credit of $18.00 because the plaintiff conceded in his sworn answer that this amount, representing one year\'s interest, had been paid and was erroneously included in the judgment. In contrast, Mullet v. Hensel found no evidence worthy of consideration for fraud and indefinite testimony regarding payment, leading to a complete refusal to open the judgment without any modification.' },
-      { question: 'What specific type of neglect was present in both Linker-Flores v. Ark. Dep\'t of Human Servs. (6110142) and Linker-Flores v. Ark. Dep\'t of Human Servs. (6109471) that contributed to the children being adjudicated dependent-neglected?', answer: 'In both Linker-Flores v. Ark. Dep\'t of Human Servs. (6110142) and Linker-Flores v. Ark. Dep\'t of Human Servs. (6109471), environmental neglect was a contributing factor to the children being adjudicated dependent-neglected.' },
-    ],
-  },
-  {
-    domain: '🔗 Multi-Case Citation Chains (3-hop)',
-    questions: [
-      { question: 'What principle regarding common-law indemnification for property owners without control over a worksite originated in Kosiorek v. Bethlehem Steel Corp. (5922378), how did Bland v. Manocherian (5950920) apply this principle to grant indemnification to a construction manager and a subcontractor, and how did Bland v. Manocherian (5984358) then distinguish or build upon the earlier Bland v. Manocherian\'s application of indemnification by focusing solely on Labor Law § 240 (1) liability without addressing indemnification?', answer: 'Kosiorek v. Bethlehem Steel Corp. established the principle that a property owner whose liability is based solely on its status as owner and who had no control or supervision of the worksite is entitled to contractual indemnification. Bland v. Manocherian (1993) applied this principle by granting common-law indemnification to Balling Construction Management, Inc. and CRSS Constructors, Inc. (a joint venture) because they provided only contract management services and had no authority over contractors or the work, and to A.L.P. Steel Corp. because it subcontracted the erection work and did not control or supervise the work or direct construction procedures or safety measures. Bland v. Manocherian (1994) did not address indemnification, instead focusing solely on affirming partial summary judgment for the plaintiff on a Labor Law § 240 (1) cause of action, emphasizing the owner\'s non-delegable duty to provide proper protection regardless of the worker\'s actions.' },
-      { question: 'What principle regarding the extent of cross-examination on immaterial matters originated in People v. Sorge (5953698), how did People v. Contes (5978611) apply this principle to limit cross-examination concerning a witness\'s alleged prior bank robbery, and how did People v. Boulware (6050541) in turn build on or distinguish People v. Contes\'s application by restricting cross-examination regarding a victim\'s arrests versus convictions?', answer: 'The principle that the extent of cross-examination of a witness upon matters immaterial to the issue is within the discretion of the trial court, and reviewable only for plain abuse and injustice, originated in People v. Sorge. People v. Contes applied this principle by affirming the trial court\'s discretion in limiting cross-examination of a prosecution witness concerning a bank robbery that the witness denied committing, and further in refusing to permit the introduction of an FBI videotape of that robbery to impeach the witness\'s credibility. People v. Boulware built on this by affirming the trial court\'s proper exercise of discretion in precluding questions concerning a victim\'s arrests as opposed to convictions, aligning with the general principle of limiting cross-examination to relevant matters and convictions for impeachment, rather than mere arrests.' },
-      { question: 'What specific issue did People v. Lang (5935319) address regarding a defendant\'s intent, how did People v. Cruickshank (5953899) implicitly apply a similar standard to a different issue, and how did People v. Bleakley (6047154) then explicitly apply that standard to yet another distinct issue?', answer: 'People v. Lang addressed whether a defendant\'s intoxication prevented the formation of requisite intent, finding it to be an issue of fact and credibility for the jury. People v. Cruickshank, while not directly on intent, implicitly applied a similar standard by affirming the denial of youthful offender status after reviewing the record and considering relevant factors, indicating a factual determination. People v. Bleakley then explicitly applied this standard to the denial of youthful offender status, stating that the court did not abuse its discretion in light of the defendant\'s actions, thereby treating the youthful offender determination as a factual and discretionary matter for the court, similar to how Lang treated intent as a factual matter for the jury.' },
-      { question: 'What was the original burden-shifting framework established in McDONNELL DOUGLAS CORP v. GREEN (108786) for proving employment discrimination, how did EVANS v. TECHNOLOGIES APPLICATIONS & SERVICE COMPANY (715797) apply this framework to a failure-to-promote claim, and how did DEPAOLI v. VACATION SALES ASSOCIATES, LLC (2481677) subsequently apply the framework to a retaliation claim, specifically regarding the plaintiff\'s burden to show a causal connection?', answer: 'In McDONNELL DOUGLAS CORP v. GREEN, the Supreme Court established a three-part burden-shifting framework for proving employment discrimination under Title VII: first, the plaintiff must establish a prima facie case of discrimination; second, the burden shifts to the employer to articulate a legitimate, nondiscriminatory reason for its action; and third, the plaintiff must then be afforded an opportunity to prove that the employer\'s stated reason was in fact pretext. EVANS v. TECHNOLOGIES APPLICATIONS & SERVICE COMPANY applied this framework to a failure-to-promote claim, finding that the plaintiff failed to establish a prima facie case because she did not show that she was qualified for the promotion or that the position remained open or was filled by someone outside the protected class. DEPAOLI v. VACATION SALES ASSOCIATES, LLC, in turn, applied the McDonnell Douglas framework to a retaliation claim, noting that to establish a prima facie case of retaliation, the plaintiff must show a causal connection between the protected activity and the adverse employment action, which can be demonstrated by evidence that the employer was aware of the protected activity and that the adverse action followed shortly thereafter.' },
-      { question: 'What principle regarding consent as a substitute for probable cause originated in People v. Hodge (5956508), how did People v. Langdon (5989323) apply it, and how did People v. Robert C. W. (5992365) in turn build on or distinguish People v. Langdon\'s application of it?', answer: 'The principle that consent is a valid substitute for probable cause originated in People v. Hodge, where the court found no merit to the defendant\'s argument that his oral statements were the product of custodial detention without probable cause because he voluntarily agreed to accompany the officer. People v. Langdon applied this principle by affirming a youthful offender adjudication, finding that the interview of the defendant and subsequent transport to the scene of a burglary were consensual and proper. People v. Robert C. W. did not directly build on or distinguish People v. Langdon\'s application of the consent principle; instead, People v. Robert C. W. focused on the separate issue of when the right to counsel attaches, specifically whether the mere assignment of counsel constitutes actual representation precluding interrogation on an unrelated charge, a point also touched upon in People v. Langdon regarding the right to counsel, but distinct from the consent issue.' },
-      { question: 'What principle regarding the dedication of streets to public use originated in Trutt v. Spotts (6238271), how did the Opinion (6238701) by Mr. Justice Green apply or affirm a related principle concerning already located streets, and how did the Opinion (6238833) by Mr. Justice Green then distinguish the concept of dedication when a grantor merely refers to a municipally laid out but unopened street as a boundary?', answer: 'Trutt v. Spotts established the principle that when a proprietor sells and conveys lots according to a plan showing them to be on streets, he is held to have stamped upon them the character of public streets, thereby dedicating them to public use and preventing him from revoking that dedication. The Opinion by Mr. Justice Green in 1886 affirmed the decision in In re Jackson street, holding that the act of 1874 does not apply to cases where streets in Philadelphia have already been located, thereby reinforcing the finality of established street locations. The Opinion by Mr. Justice Green in 1887 distinguished the concept of dedication by clarifying that merely referring to a street laid out but not opened by municipal authority as a boundary in a deed does not constitute a dedication of the land within the street limits to the public, nor does it deprive the owner of the right to compensation when the land is actually taken, as such a reference is a private contractual matter between grantor and grantee, not an act of the owner towards the public.' },
-      { question: 'What principle regarding the admissibility of showup identification procedures originated in People v. Brnja (5904974), how did People v. Rivera (5912255) apply it in the context of a showup involving codefendants, and how did People v. Love (5990920) in turn build on or distinguish People v. Rivera\'s application of it?', answer: 'The principle originating in People v. Brnja is that showup identification testimony is admissible if the procedure occurred within a reasonably short time after the crime and immediately subsequent to the apprehension of a defendant fitting the description, and was not so unnecessarily suggestive and conducive to irreparable mistaken identification as to deny due process. People v. Rivera applied this by affirming the admissibility of a showup identification where the defendant and codefendant, both matching descriptions, were promptly detained and viewed on-scene by the complainant, specifically finding that viewing codefendants together was not unduly suggestive. People v. Love, however, does not explicitly build on or distinguish People v. Rivera\'s application regarding codefendants; instead, it generally affirms the denial of a motion to suppress identification testimony, citing other cases for the general proposition of proper pretrial identification, without detailing the specific nature of the showup or its suggestiveness.' },
-      { question: 'What specific procedural requirement for persistent felony offender sentencing, first highlighted in People v. Kelly (5925781), was further elaborated upon in Mincey v. Arizona (5951652), and how did People v. Favor (5976484) demonstrate the People\'s burden in meeting that requirement?', answer: 'People v. Kelly established that a court must consider a defendant\'s "history and character" in addition to criminal conduct when determining persistent felony offender status, as required by CPL 400.20 (1) (b). Mincey v. Arizona further elaborated on this by stating that the court must provide a separate statement setting forth the dates and places of prior convictions and the factors in the defendant\'s history and background warranting persistent felony offender status, as required by CPL 400.20 (3), and must expressly adopt the conviction history or elaborate on the factors considered. People v. Favor demonstrated that the People bear the burden of proving that the defendant is the person convicted of the prior felonies set forth in the court\'s statement, and that a prior court decision alone, without the underlying proof being received as evidence, is insufficient to meet this burden.' },
-      { question: 'What specific pleading requirement for municipal liability under 42 USC § 1983 was established in People v. Jackson (5960551), how did Felder v. Casey (5990590) apply this requirement to dismiss a claim, and how did the later Felder v. Casey (6070817) opinion, in turn, address the viability of a civil rights claim against a municipality in light of this requirement?', answer: 'In People v. Jackson, the court established that to prevail on a 42 USC § 1983 claim against a municipality, a plaintiff must specifically plead and prove that the municipality itself caused the constitutional violation, not merely through respondeat superior. Felder v. Casey (5990590) applied this by dismissing the plaintiff\'s claim against the municipality because of his failure to specifically plead the existence of an official policy or custom that deprived him of a constitutional right. The later Felder v. Casey (6070817) opinion, however, affirmed the denial of the defendants\' motion for summary judgment, allowing the civil rights claim to proceed, indicating that the plaintiff in that specific case had overcome the pleading hurdle regarding municipal liability, though the opinion itself does not detail how.' },
-      { question: 'What principle regarding an executor\'s duty to make an estate productive originated in Wingate, S. (6154762), how did Wingate, S. (6154800) apply this principle to justify denying commissions, and how did Maximilian Moss, S. (6178451) subsequently address the executors\' discretion in liquidating a business, considering the potential for unproductivity?', answer: 'In Wingate, S., the court established that an executor cannot keep an estate substantially unproductive for an extended period, thereby depriving a dependent of support, and escape liability, emphasizing that a power of sale, though using the word "authorize," can be mandatory if the testator\'s intention was for prompt sale and distribution. Wingate, S. (144 Misc. 434) applied this principle by denying commissions to an executor who, despite a testamentary direction to sell and divide property, kept estate funds in an unproductive commercial bank account for seventeen years, failing to set up a trust or pay income to the beneficiary. Maximilian Moss, S. later addressed the executors\' discretion in liquidating a business, noting that the will directed liquidation "as soon as may be practicable" and granted wide discretionary powers, including the right to retain and invest in nonlegal investments, thereby distinguishing the level of discretion and the nature of the assets from the more straightforward sale and distribution directed in the Wingate cases.' },
-      { question: 'What standard for viewing evidence in a light most favorable to the prosecution originated in People v. Contes (5925303), how did People v. Contes (6005367) apply this standard to determine the legal sufficiency of evidence for robbery in the third degree, and how did People v. Contes (6009013) subsequently apply the same standard to establish legal sufficiency for felony murder based on an underlying robbery?', answer: 'The standard for viewing evidence in a light most favorable to the prosecution originated in People v. Contes (60 NY2d 620), which People v. Contes (5925303) cited to affirm a conviction for robbery in the second degree. People v. Contes (6005367) applied this standard to find legally sufficient evidence for robbery in the third degree, specifically noting that the defendant\'s statement, "Do as I tell you and you won’t get hurt," was sufficient to conclude a threat of immediate physical force. People v. Contes (6009013) subsequently applied the same standard to determine that the evidence was legally sufficient to establish the defendant\'s guilt of felony murder, based upon the underlying felony of robbery.' },
-    ],
-  },
-];
-
+/* Round 3 questions (S&P-100 SEC filings) — generated from the official QA sets */
 /* ─── Themes ─── */
 const THEMES = {
   light: {
@@ -310,7 +210,7 @@ function Spinner({ t }) {
 }
 
 /* ─── Pipeline Card ─── */
-function PipelineCard({ name, data, judge, judgeSource, t }) {
+function PipelineCard({ name, data, judge, judgeSource, graded, citation, t }) {
   const [expanded, setExpanded] = useState(true);
   const color  = PIPELINE_COLORS[name];
   const Icon   = PIPELINE_ICONS[name];
@@ -364,6 +264,20 @@ function PipelineCard({ name, data, judge, judgeSource, t }) {
           </div>
           <JudgeBadge judge={judge} source={judgeSource} t={t} />
         </div>
+        {(graded != null || citation != null) && (
+          <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+            {graded != null && (
+              <span style={{ background: 'rgba(22,163,74,0.08)', border: '1px solid rgba(22,163,74,0.25)', color: '#16a34a', borderRadius: 20, padding: '3px 12px', fontSize: 12, fontWeight: 800 }}>
+                Graded {graded}/3
+              </span>
+            )}
+            {citation != null && (
+              <span style={{ background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.25)', color: '#3b82f6', borderRadius: 20, padding: '3px 12px', fontSize: 12, fontWeight: 800 }}>
+                Citation {citation}/2
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Metrics */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 14 }}>
@@ -433,7 +347,7 @@ function PipelineCard({ name, data, judge, judgeSource, t }) {
 /* ─── Results Section ─── */
 function ResultsSection({ result, t }) {
   const pct    = result.token_reduction_pct;
-  const graphFailed  = result.graphrag_status && result.graphrag_status !== 'ok';
+  const graphFailed  = result.graphrag_status && !['ok', 'vector_only'].includes(result.graphrag_status);
   const basicRagFailed = result.basic_rag?.status === 'faiss_unavailable';
   const maxTok = Math.max(...PIPELINE_KEYS.map(k => result[k].total_tokens));
   const chartData = PIPELINE_KEYS.map(k => ({
@@ -587,6 +501,8 @@ function ResultsSection({ result, t }) {
               key={key} name={key} data={result[key]}
               judge={result[`judge_${key}`]}
               judgeSource={result[`judge_${key}_source`]}
+              graded={key === 'graphrag' ? result.graded_graphrag : undefined}
+              citation={key === 'graphrag' ? result.citation_graphrag : undefined}
               t={t}
             />
           ))}
@@ -623,6 +539,153 @@ function ResultsSection({ result, t }) {
               {result.bertscore.bonus_hit ? <CheckCircle2 size={13} /> : <XCircle size={13} />}
               {result.bertscore.bonus_hit ? 'BONUS HIT' : 'BONUS MISSED'}
             </span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+/* ─── Official Results (frozen-config held-out benchmark) ─── */
+function OfficialResults({ t }) {
+  const [data, setData] = useState(null);
+  const [open, setOpen] = useState(true);
+  const [pqPipe, setPqPipe] = useState('graphrag');
+  const [pqFails, setPqFails] = useState(false);
+  useEffect(() => {
+    axios.get(`${API_BASE}/results`).then(r => setData(r.data)).catch(() => setData(null));
+  }, []);
+  if (!data) return null;
+  const agg = data.aggregate || {};
+  const tierData = Object.entries(data.tiers || {}).map(([tier, v]) => ({
+    tier: `Tier ${tier}`,
+    ...Object.fromEntries(PIPELINE_KEYS.map(k => [k, v[k] ?? 0])),
+  }));
+  const ablationLabels = { no_graph: 'Graph OFF', no_scope: 'Scoping OFF', no_opt: 'Context-opt OFF' };
+  return (
+    <div style={{
+      background: t.surface, border: `1px solid ${t.border}`,
+      borderRadius: 20, boxShadow: t.cardShadow, overflow: 'hidden', marginBottom: 28,
+    }}>
+      <button onClick={() => setOpen(o => !o)} style={{
+        width: '100%', padding: '18px 24px', background: 'none', border: 'none',
+        cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10,
+        borderBottom: open ? `1px solid ${t.border}` : 'none',
+      }}>
+        <Award size={16} color="#16a34a" />
+        <span style={{ fontSize: 14, fontWeight: 700, color: t.text }}>
+          Official Held-Out Benchmark — {data.runs} independent runs, frozen config
+        </span>
+        <span style={{
+          background: 'rgba(22,163,74,0.1)', color: '#16a34a', border: '1px solid rgba(22,163,74,0.3)',
+          borderRadius: 20, padding: '2px 10px', fontSize: 11, fontWeight: 800,
+        }}>−{data.token_reduction_pct}% tokens vs RAG</span>
+        <ChevronDown size={14} color={t.textSubtle} style={{ marginLeft: 'auto', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+      </button>
+      {open && (
+        <div style={{ padding: 24 }}>
+          <div style={{ overflowX: 'auto', marginBottom: 24 }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+              <thead>
+                <tr style={{ background: t.surface2 }}>
+                  {['Pipeline', 'Strict Pass', 'Graded /3', 'Citation /2', 'BERTScore F1', 'Avg Tokens', 'Latency'].map(h => (
+                    <th key={h} style={{ padding: '10px 14px', borderBottom: `1px solid ${t.border}`, color: t.textSubtle, textAlign: 'left', fontWeight: 700, fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.07em' }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {PIPELINE_KEYS.map(k => agg[k] && (
+                  <tr key={k} style={{ borderBottom: `1px solid ${t.border}`, background: k === 'graphrag' ? 'rgba(22,163,74,0.05)' : 'transparent' }}>
+                    <td style={{ padding: '11px 14px', fontWeight: 800, color: PIPELINE_COLORS[k] }}>{PIPELINE_LABELS[k]}</td>
+                    <td style={{ padding: '11px 14px', fontWeight: 800, color: t.text }}>{agg[k].pass_pct}%</td>
+                    <td style={{ padding: '11px 14px', color: t.textMuted }}>{agg[k].graded}</td>
+                    <td style={{ padding: '11px 14px', color: t.textMuted }}>{agg[k].citation}</td>
+                    <td style={{ padding: '11px 14px', color: t.textMuted }}>{agg[k].bert_f1}</td>
+                    <td style={{ padding: '11px 14px', color: t.textMuted }}>{agg[k].avg_tokens?.toLocaleString()}</td>
+                    <td style={{ padding: '11px 14px', color: t.textMuted }}>{agg[k].avg_latency_s}s</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div style={{ fontSize: 11, fontWeight: 700, color: t.textSubtle, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 10 }}>Strict pass rate by question tier (%)</div>
+          <div style={{ height: 220, marginBottom: 20 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={tierData} barGap={4}>
+                <CartesianGrid strokeDasharray="3 3" stroke={t.border} />
+                <XAxis dataKey="tier" tick={{ fill: t.textMuted, fontSize: 12 }} />
+                <YAxis domain={[0, 100]} tick={{ fill: t.textMuted, fontSize: 12 }} />
+                <Tooltip contentStyle={{ background: t.surface, border: `1px solid ${t.border}`, borderRadius: 10 }} />
+                {PIPELINE_KEYS.map(k => <Bar key={k} dataKey={k} name={PIPELINE_LABELS[k]} fill={PIPELINE_COLORS[k]} radius={[4, 4, 0, 0]} />)}
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          {Object.keys(data.ablations || {}).length > 0 && (
+            <>
+              <div style={{ fontSize: 11, fontWeight: 700, color: t.textSubtle, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 10 }}>Ablations — GraphRAG mechanism contribution (full: {agg.graphrag?.pass_pct}% · {agg.graphrag?.avg_tokens?.toLocaleString()} tok)</div>
+              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                {Object.entries(data.ablations).map(([k, v]) => (
+                  <div key={k} style={{ background: t.surface2, border: `1px solid ${t.border}`, borderRadius: 14, padding: '12px 18px', minWidth: 160 }}>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: t.textSubtle, marginBottom: 4 }}>{ablationLabels[k] || k}</div>
+                    <div style={{ fontSize: 18, fontWeight: 800, color: t.text }}>{v.pass_pct}%
+                      <span style={{ fontSize: 12, fontWeight: 700, color: '#ef4444', marginLeft: 8 }}>
+                        {(v.pass_pct - (agg.graphrag?.pass_pct ?? 0)).toFixed(1)} pts
+                      </span>
+                    </div>
+                    <div style={{ fontSize: 11, color: t.textMuted }}>{v.avg_tokens?.toLocaleString()} avg tokens</div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+
+          <div style={{ fontSize: 11, fontWeight: 700, color: t.textSubtle, textTransform: 'uppercase', letterSpacing: '0.07em', margin: '22px 0 10px' }}>
+            Per-question results (run 1) — every question reported, failures included
+          </div>
+          <div style={{ display: 'flex', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
+            {PIPELINE_KEYS.map(k => (
+              <button key={k} onClick={() => setPqPipe(k)} style={{
+                background: pqPipe === k ? `${PIPELINE_COLORS[k]}18` : 'transparent',
+                border: `1px solid ${pqPipe === k ? PIPELINE_COLORS[k] : t.border}`,
+                color: pqPipe === k ? PIPELINE_COLORS[k] : t.textMuted,
+                borderRadius: 20, padding: '4px 14px', fontSize: 12, fontWeight: 700, cursor: 'pointer',
+              }}>{PIPELINE_LABELS[k]}</button>
+            ))}
+            <button onClick={() => setPqFails(f => !f)} style={{
+              background: pqFails ? 'rgba(239,68,68,0.1)' : 'transparent',
+              border: `1px solid ${pqFails ? '#ef4444' : t.border}`,
+              color: pqFails ? '#ef4444' : t.textMuted,
+              borderRadius: 20, padding: '4px 14px', fontSize: 12, fontWeight: 700, cursor: 'pointer', marginLeft: 'auto',
+            }}>Failures only</button>
+          </div>
+          <div style={{ overflowX: 'auto', maxHeight: 420, overflowY: 'auto', border: `1px solid ${t.border}`, borderRadius: 12 }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+              <thead style={{ position: 'sticky', top: 0, background: t.surface2, zIndex: 1 }}>
+                <tr>
+                  {['QID', 'Tier', 'Judge', 'Graded', 'Cite', 'BERT F1', 'Tokens', 'Graph path', 'Question'].map(h => (
+                    <th key={h} style={{ padding: '8px 12px', borderBottom: `1px solid ${t.border}`, color: t.textSubtle, textAlign: 'left', fontWeight: 700, fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {(data.per_question || [])
+                  .filter(r => r.pipeline === pqPipe && (!pqFails || r.judge !== 'PASS'))
+                  .map((r, i) => (
+                    <tr key={i} style={{ borderBottom: `1px solid ${t.border}`, background: r.judge !== 'PASS' ? 'rgba(239,68,68,0.05)' : 'transparent' }}>
+                      <td style={{ padding: '7px 12px', fontWeight: 700, color: t.text, whiteSpace: 'nowrap' }}>{r.qid}</td>
+                      <td style={{ padding: '7px 12px', color: t.textMuted }}>{r.tier}</td>
+                      <td style={{ padding: '7px 12px', fontWeight: 800, color: r.judge === 'PASS' ? '#16a34a' : '#ef4444' }}>{r.judge}</td>
+                      <td style={{ padding: '7px 12px', color: t.textMuted }}>{r.graded ?? '—'}/3</td>
+                      <td style={{ padding: '7px 12px', color: t.textMuted }}>{r.citation ?? '—'}/2</td>
+                      <td style={{ padding: '7px 12px', color: t.textMuted }}>{r.bert_f1 ?? '—'}</td>
+                      <td style={{ padding: '7px 12px', color: t.textMuted }}>{r.total_tokens?.toLocaleString()}</td>
+                      <td style={{ padding: '7px 12px', color: t.textSubtle, maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.graph_path || '—'}</td>
+                      <td style={{ padding: '7px 12px', color: t.text, maxWidth: 340, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.question}</td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
           </div>
         </div>
       )}
@@ -701,7 +764,7 @@ export default function App() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#4ade80', boxShadow: '0 0 8px #4ade80', animation: 'pulse-ring 2s ease infinite' }} />
               <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-                TigerGraph GraphRAG · Legal Citation Graph
+                TigerGraph GraphRAG · Round 3 · S&P-100 SEC Filings
               </span>
             </div>
             <button
@@ -728,7 +791,7 @@ export default function App() {
             }}>
               <Network size={15} color="#4ade80" />
               <span style={{ fontSize: 14, color: '#4ade80', fontWeight: 700, letterSpacing: '0.02em' }}>
-                117.5M Token Legal Citation Graph
+                S&P-100 Filings Graph · 400 docs · 86,552 chunk vectors
               </span>
             </div>
             <h1 style={{
@@ -753,10 +816,10 @@ export default function App() {
             {/* Stat cards */}
             <div style={{ display: 'flex', justifyContent: 'center', gap: 16, flexWrap: 'wrap' }}>
               {[
-                { icon: BookOpen, value: '63,632',     label: 'Court Opinions' },
-                { icon: Hash,     value: '117.5M',     label: 'Tokens Indexed' },
-                { icon: Layers,   value: '500,959',    label: 'FAISS Chunks' },
-                { icon: GitMerge, value: '9,632',      label: 'Citation Edges' },
+                { icon: BookOpen, value: '400',        label: 'SEC Filings' },
+                { icon: Hash,     value: '86.5K',      label: 'Chunk Vectors' },
+                { icon: Layers,   value: '100',        label: 'S&P-100 Companies' },
+                { icon: GitMerge, value: '174K',       label: 'Graph Edges' },
               ].map(({ icon: Icon, value, label }) => (
                 <div key={label} style={{
                   background: t.statCard, border: `1px solid ${t.statCardBorder}`,
@@ -919,7 +982,7 @@ export default function App() {
               ref={inputRef}
               value={question}
               onChange={e => setQuestion(e.target.value)}
-              placeholder="e.g. How did People v. Contes apply the harmless error principle?"
+              placeholder="e.g. Which companies are audited by KPMG? · What dividend did Costco declare?"
               style={inputStyle}
               onFocus={e => { e.target.style.borderColor = '#16a34a'; e.target.style.boxShadow = '0 0 0 3px rgba(22,163,74,0.1)'; }}
               onBlur={e => { e.target.style.borderColor = t.border; e.target.style.boxShadow = 'none'; }}
@@ -1090,6 +1153,9 @@ export default function App() {
           </div>
         )}
 
+        {/* ── Official benchmark ── */}
+        <OfficialResults t={t} />
+
         {/* ── Footer ── */}
         <div style={{ marginTop: 48, textAlign: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 8 }}>
@@ -1102,7 +1168,7 @@ export default function App() {
             Powered by <strong style={{ color: t.textMuted }}>Gemini 2.5 Flash</strong> ·{' '}
             <strong style={{ color: t.textMuted }}>TigerGraph</strong> Knowledge Graph ·{' '}
             <strong style={{ color: t.textMuted }}>FAISS</strong> Vector Index ·{' '}
-            <strong style={{ color: t.textMuted }}>102.9M</strong> tokens indexed
+            <strong style={{ color: t.textMuted }}>Savanna</strong> HNSW vector search \u00b7 deterministic 0-token router
           </div>
         </div>
       </div>
