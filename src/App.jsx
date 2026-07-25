@@ -5,7 +5,7 @@ import {
   Zap, Brain, Database, Network, Clock, DollarSign, Hash,
   CheckCircle2, XCircle, History, BarChart2, Moon, Sun,
   Sparkles, TrendingDown, Award, ChevronDown, BookOpen,
-  Layers, GitMerge,
+  Layers, GitMerge, AlertTriangle,
 } from 'lucide-react';
 import { FEATURED_QUESTIONS, DOMAIN_QUESTIONS } from './round3_questions';
 
@@ -551,6 +551,97 @@ function ResultsSection({ result, t }) {
 }
 
 
+/* ─── Research-integrity panel ───
+   Served from GET /results -> integrity, computed from the same raw CSVs as the
+   headline table. It lives here, next to the headline, so the live demo and the
+   written report can never tell different stories: our pre-submission audit found
+   a test-set-isolation breach that inflates the full-set figure, and the corrected
+   cuts belong in front of anyone reading the flattering number. */
+function IntegrityPanel({ integrity, t }) {
+  const { cuts = [], cross_judge: cj, baseline_fairness: bf, disclosure } = integrity;
+  const amber = '#d97706';
+  return (
+    <div style={{
+      border: `1px solid ${amber}55`, background: `${amber}0d`,
+      borderRadius: 12, padding: 18, marginBottom: 24,
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+        <AlertTriangle size={15} color={amber} />
+        <span style={{ fontSize: 12, fontWeight: 800, color: amber, textTransform: 'uppercase', letterSpacing: '0.07em' }}>
+          Research integrity — self-disclosed
+        </span>
+      </div>
+      <p style={{ fontSize: 12.5, lineHeight: 1.6, color: t.textMuted, margin: '0 0 14px' }}>
+        {disclosure}
+      </p>
+
+      <div style={{ overflowX: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12.5 }}>
+          <thead>
+            <tr style={{ background: t.surface2 }}>
+              {['Result cut', 'Qs', 'LLM-only', 'Trad. RAG', 'GraphRAG', 'Tokens vs RAG', 'Ratio'].map(h => (
+                <th key={h} style={{ padding: '8px 12px', borderBottom: `1px solid ${t.border}`, color: t.textSubtle, textAlign: 'left', fontWeight: 700, fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {cuts.map(c => {
+              const claim = c.label.includes('headline claim');
+              return (
+                <tr key={c.label} style={{
+                  borderBottom: `1px solid ${t.border}`,
+                  background: claim ? 'rgba(22,163,74,0.07)' : 'transparent',
+                }}>
+                  <td style={{ padding: '10px 12px', fontWeight: claim ? 800 : 600, color: claim ? '#16a34a' : t.text }}>
+                    {c.label}
+                    <div style={{ fontSize: 10.5, fontWeight: 400, color: t.textSubtle, marginTop: 3, maxWidth: 380, lineHeight: 1.45 }}>{c.note}</div>
+                  </td>
+                  <td style={{ padding: '10px 12px', color: t.textMuted }}>{c.n_questions}</td>
+                  <td style={{ padding: '10px 12px', color: t.textMuted }}>{c.llm_only_pass}%</td>
+                  <td style={{ padding: '10px 12px', color: t.textMuted }}>{c.basic_rag_pass}%</td>
+                  <td style={{ padding: '10px 12px', fontWeight: 800, color: claim ? '#16a34a' : t.text }}>{c.graphrag_pass}%</td>
+                  <td style={{ padding: '10px 12px', color: t.textMuted }}>−{c.token_reduction_pct}%</td>
+                  <td style={{ padding: '10px 12px', color: t.textMuted }}>{c.ratio}×</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginTop: 14 }}>
+        {cj && (
+          <div style={{ flex: '1 1 260px', background: t.surface, border: `1px solid ${t.border}`, borderRadius: 10, padding: 12 }}>
+            <div style={{ fontSize: 10, fontWeight: 800, color: t.textSubtle, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Independent judge</div>
+            <div style={{ fontSize: 20, fontWeight: 800, color: t.text }}>{cj.agreement_pct}% <span style={{ fontSize: 12, fontWeight: 600, color: t.textMuted }}>agreement</span></div>
+            <div style={{ fontSize: 11, color: t.textSubtle, marginTop: 5, lineHeight: 1.5 }}>
+              {cj.judge_model} re-scoring answers written by {cj.generator_model}. {cj.note}
+            </div>
+          </div>
+        )}
+        {bf && (
+          <div style={{ flex: '1 1 260px', background: t.surface, border: `1px solid ${t.border}`, borderRadius: 10, padding: 12 }}>
+            <div style={{ fontSize: 10, fontWeight: 800, color: t.textSubtle, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Baseline fairness</div>
+            <div style={{ fontSize: 20, fontWeight: 800, color: t.text }}>
+              {bf.rag_as_reported_pass}% → {bf.rag_with_labels_pass}%
+              <span style={{ fontSize: 12, fontWeight: 600, color: t.textMuted }}> RAG w/ source labels</span>
+            </div>
+            <div style={{ fontSize: 11, color: t.textSubtle, marginTop: 5, lineHeight: 1.5 }}>
+              {bf.finding} {bf.note}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div style={{ fontSize: 11, color: t.textSubtle, marginTop: 12 }}>
+        Full disclosure, failure analysis and raw files: <code style={{ color: t.textMuted }}>{integrity.details_doc}</code>.
+        No rows were removed from any result file — all 50 questions appear in every run.
+      </div>
+    </div>
+  );
+}
+
+
 /* ─── Official Results (frozen-config held-out benchmark) ─── */
 function OfficialResults({ t }) {
   const [data, setData] = useState(null);
@@ -613,6 +704,8 @@ function OfficialResults({ t }) {
               </tbody>
             </table>
           </div>
+          {data.integrity && <IntegrityPanel integrity={data.integrity} t={t} />}
+
           <div style={{ fontSize: 11, fontWeight: 700, color: t.textSubtle, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 10 }}>Strict pass rate by question tier (%)</div>
           <div style={{ height: 220, marginBottom: 20 }}>
             <ResponsiveContainer width="100%" height="100%">
