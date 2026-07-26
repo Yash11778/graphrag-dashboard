@@ -646,8 +646,6 @@ function IntegrityPanel({ integrity, t }) {
 function OfficialResults({ t }) {
   const [data, setData] = useState(null);
   const [open, setOpen] = useState(true);
-  const [pqPipe, setPqPipe] = useState('graphrag');
-  const [pqFails, setPqFails] = useState(false);
   useEffect(() => {
     axios.get(`${API_BASE}/results`).then(r => setData(r.data)).catch(() => setData(null));
   }, []);
@@ -737,53 +735,6 @@ function OfficialResults({ t }) {
             </>
           )}
 
-          <div style={{ fontSize: 11, fontWeight: 700, color: t.textSubtle, textTransform: 'uppercase', letterSpacing: '0.07em', margin: '22px 0 10px' }}>
-            Per-question results (run 1) — every question reported, failures included
-          </div>
-          <div style={{ display: 'flex', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
-            {PIPELINE_KEYS.map(k => (
-              <button key={k} onClick={() => setPqPipe(k)} style={{
-                background: pqPipe === k ? `${PIPELINE_COLORS[k]}18` : 'transparent',
-                border: `1px solid ${pqPipe === k ? PIPELINE_COLORS[k] : t.border}`,
-                color: pqPipe === k ? PIPELINE_COLORS[k] : t.textMuted,
-                borderRadius: 20, padding: '4px 14px', fontSize: 12, fontWeight: 700, cursor: 'pointer',
-              }}>{PIPELINE_LABELS[k]}</button>
-            ))}
-            <button onClick={() => setPqFails(f => !f)} style={{
-              background: pqFails ? 'rgba(239,68,68,0.1)' : 'transparent',
-              border: `1px solid ${pqFails ? '#ef4444' : t.border}`,
-              color: pqFails ? '#ef4444' : t.textMuted,
-              borderRadius: 20, padding: '4px 14px', fontSize: 12, fontWeight: 700, cursor: 'pointer', marginLeft: 'auto',
-            }}>Failures only</button>
-          </div>
-          <div style={{ overflowX: 'auto', maxHeight: 420, overflowY: 'auto', border: `1px solid ${t.border}`, borderRadius: 12 }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
-              <thead style={{ position: 'sticky', top: 0, background: t.surface2, zIndex: 1 }}>
-                <tr>
-                  {['QID', 'Tier', 'Judge', 'Graded', 'Cite', 'BERT F1', 'Tokens', 'Graph path', 'Question'].map(h => (
-                    <th key={h} style={{ padding: '8px 12px', borderBottom: `1px solid ${t.border}`, color: t.textSubtle, textAlign: 'left', fontWeight: 700, fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {(data.per_question || [])
-                  .filter(r => r.pipeline === pqPipe && (!pqFails || r.judge !== 'PASS'))
-                  .map((r, i) => (
-                    <tr key={i} style={{ borderBottom: `1px solid ${t.border}`, background: r.judge !== 'PASS' ? 'rgba(239,68,68,0.05)' : 'transparent' }}>
-                      <td style={{ padding: '7px 12px', fontWeight: 700, color: t.text, whiteSpace: 'nowrap' }}>{r.qid}</td>
-                      <td style={{ padding: '7px 12px', color: t.textMuted }}>{r.tier}</td>
-                      <td style={{ padding: '7px 12px', fontWeight: 800, color: r.judge === 'PASS' ? '#16a34a' : '#ef4444' }}>{r.judge}</td>
-                      <td style={{ padding: '7px 12px', color: t.textMuted }}>{r.graded ?? '—'}/3</td>
-                      <td style={{ padding: '7px 12px', color: t.textMuted }}>{r.citation ?? '—'}/2</td>
-                      <td style={{ padding: '7px 12px', color: t.textMuted }}>{r.bert_f1 ?? '—'}</td>
-                      <td style={{ padding: '7px 12px', color: t.textMuted }}>{r.total_tokens?.toLocaleString()}</td>
-                      <td style={{ padding: '7px 12px', color: t.textSubtle, maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.graph_path || '—'}</td>
-                      <td style={{ padding: '7px 12px', color: t.text, maxWidth: 340, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.question}</td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
-          </div>
         </div>
       )}
     </div>
